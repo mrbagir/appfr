@@ -1,4 +1,4 @@
-package grpc
+package main
 
 import (
 	"context"
@@ -11,7 +11,9 @@ type usecase struct {
 	pb.UnimplementedHelloServer
 }
 
-func (usecase) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error)
+func (usecase) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResponse, error) {
+	return &pb.HelloResponse{Message: "Hello " + in.Name}, nil
+}
 
 func main() {
 	app := app.New()
