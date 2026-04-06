@@ -18,11 +18,13 @@ type config struct {
 	AppEnv          string        `env:"APP_ENV" envDefault:"development"`
 	LoggerLevel     string        `env:"LOGGER_LEVEL" envDefault:"INFO"`
 	ShutdownTimeout time.Duration `env:"TIMEOUT" envDefault:"30s"`
+	HttpConfig      httpConfig
 	GrpcConfig      grpcConfig
 }
 
 type App struct {
 	grpcServer *grpcServer
+	httpServer *httpServer
 
 	grpcRegistered bool
 	httpRegistered bool
@@ -38,6 +40,7 @@ func New() *App {
 	app.ParseConfig(&app.config)
 	app.logger.ChangeLevel(logging.GetLevelFromString(app.config.LoggerLevel))
 
+	app.httpServer = newHTTPServer(app.logger, app.config)
 	app.grpcServer = newGRPCServer(app.logger, app.config)
 
 	return app
@@ -69,9 +72,9 @@ func (a *App) startShutdownHandler(ctx context.Context) {
 
 func (a *App) Shutdown(ctx context.Context) error {
 	var err error
-	// if a.httpServer != nil {
-	// 	err = errors.Join(err, a.httpServer.Shutdown(ctx))
-	// }
+	if a.httpServer != nil {
+		err = errors.Join(err, a.httpServer.Shutdown(ctx))
+	}
 
 	if a.grpcServer != nil {
 		err = errors.Join(err, a.grpcServer.Shutdown(ctx))
@@ -84,10 +87,20 @@ func (a *App) startAllServers(_ context.Context) {
 	wg := sync.WaitGroup{}
 
 	// a.startMetricsServer(&wg)
-	// a.startHTTPServer(&wg)
+	a.startHTTPServer(&wg)
 	a.startGRPCServer(&wg)
 
 	wg.Wait()
+}
+
+func (a *App) startHTTPServer(wg *sync.WaitGroup) {
+	if a.httpRegistered {
+		wg.Add(1)
+		go func(s *httpServer) {
+			defer wg.Done()
+			s.Run()
+		}(a.httpServer)
+	}
 }
 
 func (a *App) startGRPCServer(wg *sync.WaitGroup) {

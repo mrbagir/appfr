@@ -2,6 +2,7 @@ package qcashrules
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/metadata"
@@ -23,4 +24,12 @@ func getMetadataValue(md metadata.MD, key string) string {
 		return values[0]
 	}
 	return ""
+}
+
+func GetProcessIDFromHeaders(header http.Header) string {
+	if id := header.Get("Grpc-Metadata-Process-Id"); id != "" {
+		return id
+	}
+
+	return uuid.New().String()
 }
