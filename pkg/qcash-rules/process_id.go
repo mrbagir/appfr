@@ -8,7 +8,7 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-func GetProcessID(ctx context.Context) string {
+func GetProcessIDFromCtx(ctx context.Context) string {
 	md, _ := metadata.FromIncomingContext(ctx)
 
 	if id := getMetadataValue(md, "process_id"); id == "" {

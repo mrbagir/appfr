@@ -80,7 +80,7 @@ func logRPC(ctx context.Context, logger Logger, start time.Time, err error, meth
 	duration := time.Since(start)
 
 	logEntry := gRPCLog{
-		ID:           qcashrules.GetProcessID(ctx),
+		ID:           qcashrules.GetProcessIDFromCtx(ctx),
 		StartTime:    start.Format("2006-01-02T15:04:05.999999999-07:00"),
 		ResponseTime: duration.Microseconds(),
 		Method:       method,
