@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc/pb"
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	"github.com/mrbagir/qcash-appcore/examples/grpc/pb"
+	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
 )
 
 type Config struct {
@@ -14,8 +15,7 @@ type Config struct {
 }
 
 type usecase struct {
-	service pb.HelloClient
-	config  Config
+	config Config
 
 	pb.UnimplementedHelloServer
 }
@@ -35,12 +35,8 @@ func main() {
 	var config Config
 	app.ParseConfig(&config)
 
-	// gRPC client
-	helloClient := appcore.NewGRPCClient(app, config.SERVICE_CLIENT_ADDRESS, pb.NewHelloClient)
-
 	usecase := &usecase{
-		service: helloClient,
-		config:  config,
+		config: config,
 	}
 
 	// gRPC server

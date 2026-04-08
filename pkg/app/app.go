@@ -29,6 +29,8 @@ type App struct {
 	grpcRegistered bool
 	httpRegistered bool
 
+	grpcClients *grpcClients
+
 	config config
 	logger logging.Logger
 }
@@ -80,6 +82,10 @@ func (a *App) Shutdown(ctx context.Context) error {
 		err = errors.Join(err, a.grpcServer.Shutdown(ctx))
 	}
 
+	if a.grpcClients != nil {
+		a.grpcClients.shutdown()
+	}
+
 	return err
 }
 
@@ -111,6 +117,10 @@ func (a *App) startGRPCServer(wg *sync.WaitGroup) {
 			s.Run()
 		}(a.grpcServer)
 	}
+}
+
+func (a *App) Logger() logging.Logger {
+	return a.logger
 }
 
 func isPortAvailable(port int) bool {
