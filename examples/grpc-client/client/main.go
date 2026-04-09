@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc/pb"
+	"github.com/mrbagir/qcash-appcore/examples/grpc-client/client/pb"
 	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
 )
 

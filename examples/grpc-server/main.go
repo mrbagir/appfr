@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc/pb"
+	"github.com/mrbagir/qcash-appcore/examples/grpc-server/pb"
 	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
 )
 
