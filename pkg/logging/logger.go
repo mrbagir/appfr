@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/mrbagir/qcash-appcore/pkg/version"
@@ -41,7 +42,7 @@ type logger struct {
 	level      Level
 	output     io.Writer
 	isTerminal bool
-	lock       chan struct{}
+	lock       sync.Mutex
 }
 
 type logEntry struct {
@@ -143,14 +144,8 @@ func (l *logger) ChangeLevel(level Level) {
 }
 
 func (l *logger) prettyPrint(e *logEntry, out io.Writer) {
-	// Note: we need to lock the pretty print as printing to standard output not concurrency safe
-	// the logs when printed in go routines were getting misaligned since we are achieving
-	// a single line of log, in 2 separate statements which caused the misalignment.
-	l.lock <- struct{}{} // Acquire the channel's lock
-
-	defer func() {
-		<-l.lock // Release the channel's token
-	}()
+	l.lock.Lock()
+	defer l.lock.Unlock()
 
 	fmt.Fprintf(out, "\u001B[38;5;%dm%s\u001B[0m [%s]", e.Level.color(), e.Level.String()[0:4], e.Time.Format(time.TimeOnly))
 
@@ -173,7 +168,6 @@ func NewLogger(level Level) Logger {
 		output:     os.Stdout,
 		level:      level,
 		isTerminal: true,
-		lock:       make(chan struct{}, 1),
 	}
 }
 

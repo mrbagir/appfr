@@ -10,13 +10,7 @@ import (
 	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
 )
 
-type Config struct {
-	SERVICE_CLIENT_ADDRESS string `env:"GRPC_CLIENT" envDefault:"localhost:9001"`
-}
-
 type usecase struct {
-	config Config
-
 	pb.UnimplementedHelloServer
 }
 
@@ -31,13 +25,7 @@ func (usecase) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResp
 func main() {
 	app := appcore.New()
 
-	// Load .env
-	var config Config
-	app.ParseConfig(&config)
-
-	usecase := &usecase{
-		config: config,
-	}
+	usecase := &usecase{}
 
 	// gRPC server
 	pb.RegisterHelloServer(app, usecase)

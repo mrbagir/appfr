@@ -10,12 +10,12 @@ import (
 func main() {
 	app := appcore.New()
 
-	app.Handle("POST /api/sayhello", HalloHandler)
+	app.Handle("POST /api/sayhello", HelloHandler)
 
 	app.Run()
 }
 
-func HalloHandler(w http.ResponseWriter, r *http.Request) {
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	name := r.FormValue("name")
 	if name == "" {
 		http.Error(w, "name is required", http.StatusBadRequest)

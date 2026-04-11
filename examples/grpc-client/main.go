@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
 	"time"
 
@@ -15,28 +14,34 @@ import (
 
 func main() {
 	// Run client server
-	cmd := exec.Command("go", "run", "./client")
-	cmd.Env = append(os.Environ(), "GRPC_PORT=9001")
-	_ = cmd.Start()
+	cmd := runClientServer()
+	defer cmd.Process.Kill()
 
 	app := appcore.New()
 
 	// Connect to client server and call SayHello
-	halloClient := client.NewGRPCClient(app, ":9001", pb.NewHelloClient)
-	callClient(halloClient)
+	helloClient := client.NewGRPCClient(app, ":9010", pb.NewHelloClient)
+	callClient(helloClient)
 
 	app.Run()
 }
 
-func callClient(halloClient pb.HelloClient) {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+func callClient(helloClient pb.HelloClient) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, err := halloClient.SayHello(ctx, &pb.HelloRequest{Name: "World"}, grpc.WaitForReady(true))
+	res, err := helloClient.SayHello(ctx, &pb.HelloRequest{Name: "World"}, grpc.WaitForReady(true))
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
 	fmt.Println(res.Message)
+}
+
+func runClientServer() *exec.Cmd {
+	cmd := exec.Command("go", "run", ".")
+	cmd.Dir = "./client"
+	_ = cmd.Start()
+	return cmd
 }

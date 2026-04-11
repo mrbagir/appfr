@@ -11,7 +11,9 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	pkgrpc "github.com/mrbagir/qcash-appcore/pkg/grpc"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc/status"
+
 	"github.com/mrbagir/qcash-appcore/pkg/http/middleware"
 	"github.com/mrbagir/qcash-appcore/pkg/logging"
 )
@@ -56,8 +58,8 @@ func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.H
 
 		out, err := fn(r.Context(), &in)
 		if err != nil {
-			if s, ok := pkgrpc.FromError(err); ok {
-				w.WriteHeader(pkgrpc.HTTPStatusFromCode(s.Code()))
+			if s, ok := status.FromError(err); ok {
+				w.WriteHeader(runtime.HTTPStatusFromCode(s.Code()))
 				fmt.Fprintf(w, `{"error":"%s"}`, s.Message())
 				return
 			}
