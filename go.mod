@@ -5,9 +5,9 @@ go 1.24.0
 require (
 	github.com/caarlos0/env/v11 v11.4.0
 	github.com/joho/godotenv v1.5.1
+	github.com/robfig/cron/v3 v3.0.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 )
-
-require google.golang.org/genproto/googleapis/api v0.0.0-20260209200024-4cfbd4190f57 // indirect
 
 require (
 	github.com/google/uuid v1.6.0

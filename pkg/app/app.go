@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/robfig/cron/v3"
 )
 
 type config struct {
@@ -30,6 +31,7 @@ type App struct {
 	httpRegistered bool
 
 	grpcClients *grpcClients
+	cron        *cron.Cron
 
 	config config
 	logger logging.Logger
@@ -44,6 +46,7 @@ func New() *App {
 
 	app.httpServer = newHTTPServer(app.logger, app.config)
 	app.grpcServer = newGRPCServer(app.logger, app.config)
+	app.cron = newCron()
 
 	return app
 }
@@ -86,6 +89,10 @@ func (a *App) Shutdown(ctx context.Context) error {
 		a.grpcClients.shutdown()
 	}
 
+	if a.cron != nil {
+		a.cron.Stop()
+	}
+
 	return err
 }
 
@@ -95,6 +102,7 @@ func (a *App) startAllServers(_ context.Context) {
 	// a.startMetricsServer(&wg)
 	a.startHTTPServer(&wg)
 	a.startGRPCServer(&wg)
+	a.startCronService(&wg)
 
 	wg.Wait()
 }
@@ -117,6 +125,14 @@ func (a *App) startGRPCServer(wg *sync.WaitGroup) {
 			s.Run()
 		}(a.grpcServer)
 	}
+}
+
+func (a *App) startCronService(wg *sync.WaitGroup) {
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		a.cron.Run()
+	}()
 }
 
 func (a *App) Logger() logging.Logger {
