@@ -1,8 +1,8 @@
 package main
 
-import "github.com/mrbagir/qcash-appcore/pkg/app"
+import "github.com/mrbagir/appfr"
 
 func main() {
-	app := app.New()
+	app := appfr.New()
 	app.Run()
 }

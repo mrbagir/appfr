@@ -1,4 +1,4 @@
-package app
+package appfr
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/mrbagir/appfr/logging"
 	"github.com/robfig/cron/v3"
 )
 

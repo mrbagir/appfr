@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"sync"
 
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
+	"github.com/mrbagir/appfr"
 )
 
 var (
@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	app := appcore.New()
+	app := appfr.New()
 
 	// runs every second
 	app.AddCronJob("* * * * * *", "counter", count)

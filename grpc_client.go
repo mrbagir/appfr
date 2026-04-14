@@ -1,7 +1,7 @@
-package app
+package appfr
 
 import (
-	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/mrbagir/appfr/logging"
 	"google.golang.org/grpc"
 )
 

@@ -3,8 +3,8 @@ package main
 import (
 	"context"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc-client/client/pb"
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
+	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr/examples/grpc-client/client/pb"
 )
 
 type usecase struct {

@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc-client/client/pb"
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
-	"github.com/mrbagir/qcash-appcore/pkg/client"
+	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr/client"
+	"github.com/mrbagir/appfr/examples/grpc-client/client/pb"
 	"google.golang.org/grpc"
 )
 

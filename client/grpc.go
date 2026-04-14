@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/mrbagir/appfr/logging"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )

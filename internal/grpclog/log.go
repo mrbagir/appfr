@@ -1,4 +1,4 @@
-package grpc
+package grpclog
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	qcashrules "github.com/mrbagir/qcash-appcore/pkg/qcash-rules"
+	"github.com/mrbagir/appfr/internal/trace"
 )
 
 const (
@@ -80,7 +80,7 @@ func logRPC(ctx context.Context, logger Logger, start time.Time, err error, meth
 	duration := time.Since(start)
 
 	logEntry := gRPCLog{
-		ID:           qcashrules.GetProcessIDFromCtx(ctx),
+		ID:           trace.GetProcessIDFromCtx(ctx),
 		StartTime:    start.Format("2006-01-02T15:04:05.999999999-07:00"),
 		ResponseTime: duration.Microseconds(),
 		Method:       method,

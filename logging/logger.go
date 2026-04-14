@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/mrbagir/qcash-appcore/pkg/version"
+	"github.com/mrbagir/appfr/version"
 )
 
 // PrettyPrint defines an interface for objects that can render

@@ -1,4 +1,4 @@
-module github.com/mrbagir/qcash-appcore
+module github.com/mrbagir/appfr
 
 go 1.24.0
 

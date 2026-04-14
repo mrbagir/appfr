@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
+	appcore "github.com/mrbagir/appfr"
 )
 
 func main() {

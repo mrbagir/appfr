@@ -1,4 +1,4 @@
-package app
+package appfr
 
 import (
 	"context"
@@ -14,8 +14,8 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/status"
 
-	"github.com/mrbagir/qcash-appcore/pkg/http/middleware"
-	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/mrbagir/appfr/logging"
+	"github.com/mrbagir/appfr/middleware"
 )
 
 type httpConfig struct {

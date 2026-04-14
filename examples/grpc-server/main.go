@@ -6,8 +6,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/mrbagir/qcash-appcore/examples/grpc-server/pb"
-	appcore "github.com/mrbagir/qcash-appcore/pkg/app"
+	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr/examples/grpc-server/pb"
 )
 
 type usecase struct {

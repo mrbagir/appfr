@@ -1,4 +1,4 @@
-package app
+package appfr
 
 import (
 	"time"

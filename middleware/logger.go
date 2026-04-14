@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	qcashrules "github.com/mrbagir/qcash-appcore/pkg/qcash-rules"
+	"github.com/mrbagir/appfr/internal/trace"
 )
 
 type StatusResponseWriter struct {
@@ -63,7 +63,7 @@ func Logging(logger logger) func(inner http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			srw := &StatusResponseWriter{ResponseWriter: w}
-			traceID := qcashrules.GetProcessIDFromHeaders(r.Header)
+			traceID := trace.GetProcessIDFromHeaders(r.Header)
 
 			defer func() { panicRecovery(recover(), srw, logger) }()
 

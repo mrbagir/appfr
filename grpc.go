@@ -1,4 +1,4 @@
-package app
+package appfr
 
 import (
 	"context"
@@ -8,8 +8,8 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 
-	pkg_grpc "github.com/mrbagir/qcash-appcore/pkg/grpc"
-	"github.com/mrbagir/qcash-appcore/pkg/logging"
+	"github.com/mrbagir/appfr/internal/grpclog"
+	"github.com/mrbagir/appfr/logging"
 )
 
 type grpcConfig struct {
@@ -37,7 +37,7 @@ func (a *App) RegisterService(desc *grpc.ServiceDesc, impl any) {
 func newGRPCServer(logger logging.Logger, cfg config) *grpcServer {
 	middleware := []grpc.UnaryServerInterceptor{
 		grpc_recovery.UnaryServerInterceptor(),
-		pkg_grpc.ObservabilityInterceptor(logger),
+		grpclog.ObservabilityInterceptor(logger),
 	}
 	streamMiddleware := []grpc.StreamServerInterceptor{
 		grpc_recovery.StreamServerInterceptor(),
