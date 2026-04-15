@@ -1,0 +1,38 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of the go build tool
+/build/
+/bin/
+
+# Dependency directories (vendor/)
+vendor/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+.DS_Store
+
+# Go modules
+/go.sum
+
+# Logs
+*.log
+
+# OS generated files
+Thumbs.db
+
+# Coverage files
+*.coverprofile
+coverage.out
+
+# Output directories
+out/
