@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/schema"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/status"
 
@@ -47,10 +48,12 @@ func (a *App) Handle(path string, handler http.HandlerFunc) {
 	a.httpRegistered = true
 }
 
+var decoder = schema.NewDecoder()
+
 func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var in IN
-		if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		if err := decoder.Decode(&in, r.URL.Query()); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, `{"error":"invalid request body: %v"}`, err)
 			return
