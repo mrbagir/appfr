@@ -8,7 +8,7 @@ import (
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"google.golang.org/grpc"
 
-	"github.com/mrbagir/appfr/internal/grpclog"
+	grpc_fr "github.com/mrbagir/appfr/grpc"
 	"github.com/mrbagir/appfr/logging"
 )
 
@@ -37,7 +37,7 @@ func (a *App) RegisterService(desc *grpc.ServiceDesc, impl any) {
 func newGRPCServer(logger logging.Logger, cfg config) *grpcServer {
 	middleware := []grpc.UnaryServerInterceptor{
 		grpc_recovery.UnaryServerInterceptor(),
-		grpclog.ObservabilityInterceptor(logger),
+		grpc_fr.ObservabilityInterceptor(logger),
 	}
 	streamMiddleware := []grpc.StreamServerInterceptor{
 		grpc_recovery.StreamServerInterceptor(),

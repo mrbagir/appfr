@@ -1,4 +1,4 @@
-package grpclog
+package grpc
 
 import (
 	"context"
