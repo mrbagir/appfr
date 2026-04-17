@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mrbagir/appfr/internal/trace"
+	"github.com/mrbagir/appfr/trace"
 )
 
 type StatusResponseWriter struct {
