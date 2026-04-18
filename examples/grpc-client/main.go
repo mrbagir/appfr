@@ -6,7 +6,7 @@ import (
 	"os/exec"
 	"time"
 
-	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr"
 	"github.com/mrbagir/appfr/client"
 	"github.com/mrbagir/appfr/examples/grpc-client/client/pb"
 	"google.golang.org/grpc"
@@ -17,7 +17,7 @@ func main() {
 	cmd := runClientServer()
 	defer cmd.Process.Kill()
 
-	app := appcore.New()
+	app := appfr.New()
 
 	// Connect to client server and call SayHello
 	helloClient := client.NewGRPCClient(app, ":9010", pb.NewHelloClient)

@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr"
 )
 
 func main() {
-	app := appcore.New()
+	app := appfr.New()
 
 	app.Handle("POST /api/sayhello", HelloHandler)
 

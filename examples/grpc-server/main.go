@@ -6,7 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	appcore "github.com/mrbagir/appfr"
+	"github.com/mrbagir/appfr"
 	"github.com/mrbagir/appfr/examples/grpc-server/pb"
 )
 
@@ -23,7 +23,7 @@ func (usecase) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloResp
 }
 
 func main() {
-	app := appcore.New()
+	app := appfr.New()
 
 	usecase := &usecase{}
 
@@ -31,7 +31,7 @@ func main() {
 	pb.RegisterHelloServer(app, usecase)
 
 	// HTTP server
-	app.Handle("POST /api/sayhello", appcore.HandlerRPC(usecase.SayHello))
+	app.Handle("POST /api/sayhello", appfr.HandlerRPC(usecase.SayHello))
 
 	app.Run()
 }
