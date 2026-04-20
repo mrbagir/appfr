@@ -18,7 +18,7 @@ import (
 type config struct {
 	AppEnv          string        `env:"APP_ENV" envDefault:"development"`
 	LoggerLevel     string        `env:"LOGGER_LEVEL" envDefault:"INFO"`
-	ShutdownTimeout time.Duration `env:"TIMEOUT" envDefault:"30s"`
+	ShutdownTimeout time.Duration `env:"SERVER_SHUTDOWN_TIMEOUT" envDefault:"30s"`
 	HttpConfig      httpConfig
 	GrpcConfig      grpcConfig
 }
