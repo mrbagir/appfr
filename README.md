@@ -5,7 +5,7 @@ Framework Go sederhana yang dev-friendly dan tidak mengikat. Bangun HTTP server,
 ## Install
 
 ```bash
-go get github.com/mrbagir/appfr
+go get github.com/mrbagir/appfr@v1.0.0
 ```
 
 ## Fitur
