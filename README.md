@@ -38,10 +38,38 @@ func main() {
 
 ### gRPC Server
 
+Contoh proto sederhana:
+
+```proto
+syntax = "proto3";
+
+package hello;
+
+option go_package = "./pb";
+
+service Hello {
+    rpc SayHello (HelloRequest) returns (HelloResponse);
+}
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloResponse {
+    string message = 1;
+}
+```
+
+```bash
+protoc --go_out=. --go-grpc_out=. ./{path}/*.proto
+```
+
+Implementasi server:
+
 ```go
 import "github.com/mrbagir/appfr"
 
-type usecase struct{}
+type usecase struct{ pb.UnimplementedHelloServer }
 
 func (u *usecase) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error) {
     return &pb.HelloResponse{Message: "Hello " + req.Name}, nil
@@ -59,7 +87,7 @@ gRPC + HTTP gateway sekaligus:
 ```go
 import "github.com/mrbagir/appfr"
 
-type usecase struct{}
+type usecase struct{ pb.UnimplementedHelloServer }
 
 func (u *usecase) SayHello(ctx context.Context, req *pb.HelloRequest) (*pb.HelloResponse, error) {
     return &pb.HelloResponse{Message: "Hello " + req.Name}, nil
