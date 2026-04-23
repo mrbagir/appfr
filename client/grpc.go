@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/mrbagir/appfr/logging"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -9,11 +10,16 @@ import (
 type app interface {
 	Logger() logging.Logger
 	RegisterClientConn(conn *grpc.ClientConn)
+	TelemetryEnabled() bool
 }
 
 func NewGRPCClient[T any](app app, target string, newClient func(cc grpc.ClientConnInterface) T) T {
 	options := []grpc.DialOption{
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+	}
+
+	if app.TelemetryEnabled() {
+		options = append(options, grpc.WithStatsHandler(otelgrpc.NewClientHandler()))
 	}
 
 	conn, err := grpc.NewClient(target, options...)

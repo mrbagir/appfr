@@ -6,10 +6,12 @@ import (
 	"strconv"
 
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 
 	grpc_fr "github.com/mrbagir/appfr/grpc"
 	"github.com/mrbagir/appfr/logging"
+	"github.com/mrbagir/appfr/telemetry"
 )
 
 type grpcConfig struct {
@@ -34,7 +36,7 @@ func (a *App) RegisterService(desc *grpc.ServiceDesc, impl any) {
 	a.grpcRegistered = true
 }
 
-func newGRPCServer(logger logging.Logger, cfg config) *grpcServer {
+func newGRPCServer(logger logging.Logger, cfg config, tel *telemetry.Telemetry) *grpcServer {
 	middleware := []grpc.UnaryServerInterceptor{
 		grpc_recovery.UnaryServerInterceptor(),
 		grpc_fr.ObservabilityInterceptor(logger),
@@ -43,10 +45,18 @@ func newGRPCServer(logger logging.Logger, cfg config) *grpcServer {
 		grpc_recovery.StreamServerInterceptor(),
 	}
 
+	opts := []grpc.ServerOption{}
+	if tel != nil && tel.IsEnabled() {
+		opts = append(opts,
+			grpc.StatsHandler(otelgrpc.NewServerHandler()),
+		)
+	}
+
 	return &grpcServer{
 		server:             grpc.NewServer(),
 		interceptors:       middleware,
 		streamInterceptors: streamMiddleware,
+		options:            opts,
 		config:             cfg.GrpcConfig,
 		logger:             logger,
 	}

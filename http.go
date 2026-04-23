@@ -13,10 +13,12 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc/status"
 
 	"github.com/mrbagir/appfr/http/middleware"
 	"github.com/mrbagir/appfr/logging"
+	"github.com/mrbagir/appfr/telemetry"
 )
 
 type httpConfig struct {
@@ -26,10 +28,11 @@ type httpConfig struct {
 }
 
 type httpServer struct {
-	server *http.Server
-	router *mux.Router
-	config httpConfig
-	logger logging.Logger
+	server  *http.Server
+	router  *mux.Router
+	handler http.Handler
+	config  httpConfig
+	logger  logging.Logger
 }
 
 var (
@@ -77,17 +80,23 @@ func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.H
 	}
 }
 
-func newHTTPServer(logger logging.Logger, cfg config) *httpServer {
+func newHTTPServer(logger logging.Logger, cfg config, tel *telemetry.Telemetry) *httpServer {
 	r := mux.NewRouter()
 
 	r.Use(
 		middleware.Logging(logger),
 	)
 
+	var handler http.Handler = r
+	if tel != nil && tel.IsEnabled() {
+		handler = otelhttp.NewHandler(r, "http.request")
+	}
+
 	return &httpServer{
-		router: r,
-		config: cfg.HttpConfig,
-		logger: logger,
+		router:  r,
+		handler: handler,
+		config:  cfg.HttpConfig,
+		logger:  logger,
 	}
 }
 
@@ -101,7 +110,7 @@ func (h *httpServer) Run() {
 
 	h.server = &http.Server{
 		Addr:              fmt.Sprintf(":%d", h.config.Port),
-		Handler:           h.router,
+		Handler:           h.handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 

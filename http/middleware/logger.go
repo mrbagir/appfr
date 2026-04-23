@@ -9,7 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mrbagir/appfr/trace"
+	"go.opentelemetry.io/otel/trace"
+
+	appfrtrace "github.com/mrbagir/appfr/trace"
 )
 
 type StatusResponseWriter struct {
@@ -63,7 +65,13 @@ func Logging(logger logger) func(inner http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			start := time.Now()
 			srw := &StatusResponseWriter{ResponseWriter: w}
-			traceID := trace.GetProcessIDFromHeaders(r.Header)
+
+			var traceID string
+			if sc := trace.SpanFromContext(r.Context()).SpanContext(); sc.HasTraceID() {
+				traceID = sc.TraceID().String()
+			} else {
+				traceID = appfrtrace.GetProcessIDFromHeaders(r.Header)
+			}
 
 			defer func() { panicRecovery(recover(), srw, logger) }()
 

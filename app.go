@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/mrbagir/appfr/logging"
+	"github.com/mrbagir/appfr/telemetry"
 	"github.com/robfig/cron/v3"
 )
 
@@ -21,6 +22,7 @@ type config struct {
 	ShutdownTimeout time.Duration `env:"SERVER_SHUTDOWN_TIMEOUT" envDefault:"30s"`
 	HttpConfig      httpConfig
 	GrpcConfig      grpcConfig
+	Telemetry       telemetry.Config
 }
 
 type App struct {
@@ -33,8 +35,9 @@ type App struct {
 	grpcClients *grpcClients
 	cron        *cron.Cron
 
-	config config
-	logger logging.Logger
+	config    config
+	logger    logging.Logger
+	telemetry *telemetry.Telemetry
 }
 
 func New() *App {
@@ -44,8 +47,14 @@ func New() *App {
 	app.ParseConfig(&app.config)
 	app.logger.ChangeLevel(logging.GetLevelFromString(app.config.LoggerLevel))
 
-	app.httpServer = newHTTPServer(app.logger, app.config)
-	app.grpcServer = newGRPCServer(app.logger, app.config)
+	tel, err := telemetry.New(context.Background(), app.config.Telemetry)
+	if err != nil {
+		app.logger.Fatalf("failed to init telemetry: %v", err)
+	}
+	app.telemetry = tel
+
+	app.httpServer = newHTTPServer(app.logger, app.config, tel)
+	app.grpcServer = newGRPCServer(app.logger, app.config, tel)
 	app.cron = newCron()
 
 	return app
@@ -93,6 +102,10 @@ func (a *App) Shutdown(ctx context.Context) error {
 		a.cron.Stop()
 	}
 
+	if a.telemetry != nil {
+		err = errors.Join(err, a.telemetry.Shutdown(ctx))
+	}
+
 	return err
 }
 
@@ -137,6 +150,10 @@ func (a *App) startCronService(wg *sync.WaitGroup) {
 
 func (a *App) Logger() logging.Logger {
 	return a.logger
+}
+
+func (a *App) TelemetryEnabled() bool {
+	return a.telemetry != nil && a.telemetry.IsEnabled()
 }
 
 func isPortAvailable(port int) bool {

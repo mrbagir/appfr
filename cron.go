@@ -1,9 +1,13 @@
 package appfr
 
 import (
+	"context"
 	"time"
 
 	"github.com/robfig/cron/v3"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // AddCronJob registers a named cron job with the given schedule spec and function.
@@ -36,7 +40,7 @@ import (
 //	"0 8 * * *"        every day at 08:00    (5-field)
 //	"0 0 0 * * 1"      every Monday midnight (6-field)
 //	"0 */30 * * * *"   every 30 minutes      (6-field)
-func (a *App) AddCronJob(spec, jobName string, job func()) {
+func (a *App) AddCronJob(spec, jobName string, job func(ctx context.Context)) {
 	if a.cron == nil {
 		a.cron = newCron()
 	}
@@ -44,7 +48,24 @@ func (a *App) AddCronJob(spec, jobName string, job func()) {
 	fn := func() {
 		start := time.Now()
 		a.logger.Infof("Starting cron job: %s", jobName)
-		job()
+
+		ctx := context.Background()
+		if a.TelemetryEnabled() {
+			tracer := otel.Tracer("cron")
+			var span trace.Span
+			ctx, span = tracer.Start(ctx, "cron."+jobName,
+				trace.WithAttributes(
+					attribute.String("cron.job.name", jobName),
+					attribute.String("cron.schedule", spec),
+				),
+			)
+			defer func() {
+				span.SetAttributes(attribute.Int64("cron.job.duration_ms", time.Since(start).Milliseconds()))
+				span.End()
+			}()
+		}
+
+		job(ctx)
 		a.logger.Infof("Finished cron job: %s in %v", jobName, time.Since(start))
 	}
 

@@ -6,11 +6,12 @@ import (
 	"io"
 	"time"
 
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	"github.com/mrbagir/appfr/trace"
+	appfrtrace "github.com/mrbagir/appfr/trace"
 )
 
 const (
@@ -79,8 +80,15 @@ func ObservabilityInterceptor(logger Logger) grpc.UnaryServerInterceptor {
 func logRPC(ctx context.Context, logger Logger, start time.Time, err error, method string) {
 	duration := time.Since(start)
 
+	var id string
+	if sc := trace.SpanFromContext(ctx).SpanContext(); sc.HasTraceID() {
+		id = sc.TraceID().String()
+	} else {
+		id = appfrtrace.GetProcessIDFromCtx(ctx)
+	}
+
 	logEntry := gRPCLog{
-		ID:           trace.GetProcessIDFromCtx(ctx),
+		ID:           id,
 		StartTime:    start.Format("2006-01-02T15:04:05.999999999-07:00"),
 		ResponseTime: duration.Microseconds(),
 		Method:       method,

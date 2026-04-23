@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -21,7 +22,7 @@ func main() {
 	app.Run()
 }
 
-func count() {
+func count(_ context.Context) {
 	mu.Lock()
 	defer mu.Unlock()
 
