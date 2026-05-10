@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
 	"github.com/mrbagir/appfr/http/middleware"
@@ -74,7 +75,7 @@ func decodeHTTPInput[IN any](r *http.Request, in *IN) error {
 	return decoder.Decode(in, r.URL.Query())
 }
 
-func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
+func handlerRPC[IN, OUT any](fn func(context.Context, *IN, ...grpc.CallOption) (*OUT, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var in IN
 		if err := decodeHTTPInput(r, &in); err != nil {
@@ -99,6 +100,14 @@ func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.H
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(out)
 	}
+}
+
+func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
+	return handlerRPC(func(ctx context.Context, in *IN, _ ...grpc.CallOption) (*OUT, error) { return fn(ctx, in) })
+}
+
+func HandlerRPCOpts[IN, OUT any](fn func(context.Context, *IN, ...grpc.CallOption) (*OUT, error)) http.HandlerFunc {
+	return handlerRPC(fn)
 }
 
 func newHTTPServer(logger logging.Logger, cfg config) *httpServer {
