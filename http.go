@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -50,10 +51,33 @@ func (a *App) Handle(path string, handler http.HandlerFunc) {
 
 var decoder = schema.NewDecoder()
 
+func decodeHTTPInput[IN any](r *http.Request, in *IN) error {
+	contentType := r.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		err := json.NewDecoder(r.Body).Decode(in)
+		if err == nil {
+			return nil
+		}
+
+		// Fallback to query decoding when body is empty.
+		if errors.Is(err, io.EOF) {
+			return decoder.Decode(in, r.URL.Query())
+		}
+
+		return err
+	}
+
+	if err := r.ParseForm(); err == nil && len(r.PostForm) > 0 {
+		return decoder.Decode(in, r.PostForm)
+	}
+
+	return decoder.Decode(in, r.URL.Query())
+}
+
 func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var in IN
-		if err := decoder.Decode(&in, r.URL.Query()); err != nil {
+		if err := decodeHTTPInput(r, &in); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, `{"error":"invalid request body: %v"}`, err)
 			return
