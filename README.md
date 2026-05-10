@@ -10,7 +10,7 @@ Bangun HTTP server, gRPC server, gRPC client, dan cron jobs — tanpa boilerplat
 [![License](https://img.shields.io/badge/License-MIT-534AB7?style=flat-square)](LICENSE)
 
 ```bash
-go get github.com/mrbagir/appfr@v1.0.0
+go get github.com/mrbagir/appfr@v1.1.0
 ```
 
 </div>
