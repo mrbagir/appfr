@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/schema"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
 	"github.com/mrbagir/appfr/http/middleware"
@@ -50,10 +52,33 @@ func (a *App) Handle(path string, handler http.HandlerFunc) {
 
 var decoder = schema.NewDecoder()
 
-func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
+func decodeHTTPInput[IN any](r *http.Request, in *IN) error {
+	contentType := r.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		err := json.NewDecoder(r.Body).Decode(in)
+		if err == nil {
+			return nil
+		}
+
+		// Fallback to query decoding when body is empty.
+		if errors.Is(err, io.EOF) {
+			return decoder.Decode(in, r.URL.Query())
+		}
+
+		return err
+	}
+
+	if err := r.ParseForm(); err == nil && len(r.PostForm) > 0 {
+		return decoder.Decode(in, r.PostForm)
+	}
+
+	return decoder.Decode(in, r.URL.Query())
+}
+
+func handlerRPC[IN, OUT any](fn func(context.Context, *IN, ...grpc.CallOption) (*OUT, error)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var in IN
-		if err := decoder.Decode(&in, r.URL.Query()); err != nil {
+		if err := decodeHTTPInput(r, &in); err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			fmt.Fprintf(w, `{"error":"invalid request body: %v"}`, err)
 			return
@@ -75,6 +100,14 @@ func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.H
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(out)
 	}
+}
+
+func HandlerRPC[IN, OUT any](fn func(context.Context, *IN) (*OUT, error)) http.HandlerFunc {
+	return handlerRPC(func(ctx context.Context, in *IN, _ ...grpc.CallOption) (*OUT, error) { return fn(ctx, in) })
+}
+
+func HandlerRPCOpts[IN, OUT any](fn func(context.Context, *IN, ...grpc.CallOption) (*OUT, error)) http.HandlerFunc {
+	return handlerRPC(fn)
 }
 
 func newHTTPServer(logger logging.Logger, cfg config) *httpServer {
